@@ -31,9 +31,9 @@ class DownloadAndLoadPhi:
                 "model": (
                     [
                         "microsoft/Phi-3.5-mini-instruct",
-                        "microsoft/Phi-3.5-MoE-instruct"
+                        #"microsoft/Phi-3.5-MoE-instruct"
                     ],
-                    {"default": "microsoft/Phi-3.5-MoE-instruct"}
+                    {"default": "microsoft/Phi-3.5-mini-instruct"}
                 ),
             }
         }
@@ -157,8 +157,8 @@ class RunPhi:
             {"role": "user", "content": instruction}
         ] 
 
+        # Build pipeline
         pipe = pipeline("text-generation", model=PHI_MODEL, tokenizer=PHI_TOKENIZER)
-
         generation_args = { 
             "return_full_text": return_full_text,
             "do_sample": do_sample,
@@ -166,10 +166,13 @@ class RunPhi:
             "max_new_tokens": max_new_tokens
         } 
 
+        # Generate
         output = pipe(messages, **generation_args) 
         response = output[0]["generated_text"]
-        print("output")
-        print(output)
+
+        # Convert dictionary to text if returning full text
+        if return_full_text:
+            response = str(response)
 
         return (response,)
 
