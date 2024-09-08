@@ -1,2 +1,1 @@
 accelerate>=0.31.0
-flash_attn>=2.5.8
