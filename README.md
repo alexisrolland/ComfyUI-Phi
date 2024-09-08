@@ -19,6 +19,12 @@ git clone https://github.com/alexisrolland/ComfyUI-Phi.git
 ..\..\python_embeded\python.exe -s -m pip install -r .\ComfyUI-Phi\requirements.txt
 ```
 
-## Example
+## Examples
 
-![Example](example.png)
+### Phi Mini Instruct
+
+![Example Phi Mini Instruct](example-phi-mini.png)
+
+### Phi Vision Instruct
+
+![Example Phi Vision Instruct](example-phi-vision.png)
