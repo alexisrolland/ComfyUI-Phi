@@ -4,25 +4,20 @@ import os
 from PIL import Image
 from transformers import AutoModelForCausalLM, AutoProcessor, AutoTokenizer, pipeline
 
+import folder_paths
 
-class DownloadAndLoadPhi:
+class LoadPhi:
     """Node to download and load Phi model."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Microsoft"
+    CATEGORY = "Phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("PHI_MODEL", "PHI_TOKENIZER")
 
     def __init__(self):
-        # Get ComfyUI models folder
-        file_path = os.path.realpath(__file__)
-        directory_path = os.path.dirname(file_path)
-        directory_path = os.path.dirname(directory_path)
-        directory_path = os.path.dirname(directory_path)
-
         # Set models path to ./ComfyUI/models/microsoft
-        self.model_path = os.path.join(directory_path, "models", "microsoft")
+        self.model_path = os.path.join(folder_paths.models_dir, "microsoft")
 
     @classmethod
     def INPUT_TYPES(self):
@@ -54,24 +49,19 @@ class DownloadAndLoadPhi:
 
         return (PHI_MODEL, PHI_TOKENIZER)
 
-class DownloadAndLoadPhiVision:
+
+class LoadPhiVision:
     """Node to download and load Phi model with vision."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Microsoft"
+    CATEGORY = "Phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("PHI_MODEL", "PHI_PROCESSOR")
 
     def __init__(self):
-        # Get ComfyUI models folder
-        file_path = os.path.realpath(__file__)
-        directory_path = os.path.dirname(file_path)
-        directory_path = os.path.dirname(directory_path)
-        directory_path = os.path.dirname(directory_path)
-
         # Set models path to ./ComfyUI/models/microsoft
-        self.model_path = os.path.join(directory_path, "models", "microsoft")
+        self.model_path = os.path.join(folder_paths.models_dir, "microsoft")
 
     @classmethod
     def INPUT_TYPES(self):
@@ -106,11 +96,12 @@ class DownloadAndLoadPhiVision:
 
         return (PHI_MODEL, PHI_PROCESSOR)
 
+
 class RunPhi:
     """Node to run Phi model."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Microsoft"
+    CATEGORY = "Phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("STRING",)
@@ -129,7 +120,7 @@ class RunPhi:
                     "multiline": True
                 }),
                 "instruction": ("STRING", {
-                    "default": "Describe this image",
+                    "default": "What is the answer to life the universe and everything",
                     "multiline": True
                 }),
                 "return_full_text": ("BOOLEAN", {
@@ -176,11 +167,12 @@ class RunPhi:
 
         return (response,)
 
+
 class RunPhiVision:
     """Node to run Phi model with vision."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Microsoft"
+    CATEGORY = "Phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("STRING",)
