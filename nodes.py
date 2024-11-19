@@ -203,6 +203,12 @@ class RunPhiVision:
                     "default": 1000,
                     "min": 1
                 }),
+            },
+            "optional": {
+                "EXAMPLE_IMAGE": ("IMAGE",),
+                "example_respond": ("STRING", {
+                    "multiline": True
+                }),
             }
         }
 
@@ -215,17 +221,23 @@ class RunPhiVision:
             return out
         return [Image.fromarray(np.clip(255.0 * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))]
 
-    def execute(self, PHI_MODEL, PHI_PROCESSOR, IMAGE, instruction, do_sample, temperature, max_new_tokens):
+    def execute(self, PHI_MODEL, PHI_PROCESSOR, IMAGE, instruction, do_sample, temperature, max_new_tokens, EXAMPLE_IMAGE=None, example_respond=''):
+        # Check if example is valid
+        example_valid = True if (EXAMPLE_IMAGE is not None and len(example_respond) > 0) else False
+
         # Convert tensor to PIL image
         images = self.tensor2pil(IMAGE)
+        example_image = self.tensor2pil(EXAMPLE_IMAGE) if example_valid else []
 
         # Prepare images placeholders in the prompt
         placeholder = ''
-        for index, value in enumerate(images, start=1):
-            placeholder += f"<|image_{index}|>\n"
+        start_index = 2 if example_valid else 1
+        for index, value in enumerate(images, start=start_index):
+            placeholder += f"\n<|image_{index}|>"
 
         # Prepare prompt
-        messages = [{"role": "user", "content": placeholder + instruction}]
+        additional_instruction = f"Here is an example of pair of image and its description.\nImage: <|image_1|>\nDescription: {example_respond}\n" if example_valid else ''
+        messages = [{"role": "user", "content": additional_instruction + instruction + placeholder}]
         prompt = PHI_PROCESSOR.tokenizer.apply_chat_template(
             messages, 
             tokenize=False, 
@@ -233,7 +245,7 @@ class RunPhiVision:
         )
 
         # Prepare generation arguments
-        inputs = PHI_PROCESSOR(prompt, images, return_tensors="pt").to("cuda:0")
+        inputs = PHI_PROCESSOR(prompt, example_image + images, return_tensors="pt").to("cuda:0")
         generate_args = {}
         if do_sample:
             generate_args["do_sample"] = do_sample
