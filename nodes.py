@@ -205,8 +205,8 @@ class RunPhiVision:
                 }),
             },
             "optional": {
-                "EXAMPLE_IMAGE": ("IMAGE",),
-                "example_respond": ("STRING", {
+                "image_example": ("IMAGE",),
+                "response_example": ("STRING", {
                     "multiline": True
                 }),
             }
@@ -221,13 +221,13 @@ class RunPhiVision:
             return out
         return [Image.fromarray(np.clip(255.0 * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))]
 
-    def execute(self, PHI_MODEL, PHI_PROCESSOR, IMAGE, instruction, do_sample, temperature, max_new_tokens, EXAMPLE_IMAGE=None, example_respond=''):
+    def execute(self, PHI_MODEL, PHI_PROCESSOR, IMAGE, instruction, do_sample, temperature, max_new_tokens, image_example=None, response_example=''):
         # Check if example is valid
-        example_valid = True if (EXAMPLE_IMAGE is not None and len(example_respond) > 0) else False
+        example_valid = True if (image_example is not None and len(response_example) > 0) else False
 
         # Convert tensor to PIL image
         images = self.tensor2pil(IMAGE)
-        example_image = self.tensor2pil(EXAMPLE_IMAGE) if example_valid else []
+        example_image = [self.tensor2pil(image_example)[0]] if example_valid else []
 
         # Prepare images placeholders in the prompt
         placeholder = ''
@@ -236,7 +236,7 @@ class RunPhiVision:
             placeholder += f"\n<|image_{index}|>"
 
         # Prepare prompt
-        additional_instruction = f"Here is an example of pair of image and its description.\nImage: <|image_1|>\nDescription: {example_respond}\n" if example_valid else ''
+        additional_instruction = f"Here is an example of pair of image and its description.\nImage: <|image_1|>\nDescription: {response_example}\n" if example_valid else ''
         messages = [{"role": "user", "content": additional_instruction + instruction + placeholder}]
         prompt = PHI_PROCESSOR.tokenizer.apply_chat_template(
             messages, 
