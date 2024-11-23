@@ -6,14 +6,15 @@ from transformers import AutoModelForCausalLM, AutoProcessor, AutoTokenizer, pip
 
 import folder_paths
 
+
 class LoadPhi:
     """Node to download and load Phi model."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Phi"
+    CATEGORY = "phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
-    RETURN_TYPES = ("PHI_MODEL", "PHI_TOKENIZER")
+    RETURN_TYPES = ("phi_model", "phi_tokenizer")
 
     def __init__(self):
         # Set models path to ./ComfyUI/models/microsoft
@@ -34,7 +35,7 @@ class LoadPhi:
         }
 
     def execute(self, model):
-        PHI_MODEL = AutoModelForCausalLM.from_pretrained(
+        phi_model = AutoModelForCausalLM.from_pretrained(
             model,
             cache_dir=self.model_path,
             device_map="cuda",
@@ -42,22 +43,22 @@ class LoadPhi:
             trust_remote_code=True
         )
 
-        PHI_TOKENIZER = AutoTokenizer.from_pretrained(
+        phi_tokenizer = AutoTokenizer.from_pretrained(
             model,
             cache_dir=self.model_path
         )
 
-        return (PHI_MODEL, PHI_TOKENIZER)
+        return (phi_model, phi_tokenizer)
 
 
 class LoadPhiVision:
     """Node to download and load Phi model with vision."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Phi"
+    CATEGORY = "phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
-    RETURN_TYPES = ("PHI_MODEL", "PHI_PROCESSOR")
+    RETURN_TYPES = ("phi_model", "phi_processor")
 
     def __init__(self):
         # Set models path to ./ComfyUI/models/microsoft
@@ -76,7 +77,7 @@ class LoadPhiVision:
 
     def execute(self, model):
         # Set _attn_implementation='eager' if you don't have flash_attn installed
-        PHI_MODEL = AutoModelForCausalLM.from_pretrained(
+        phi_model = AutoModelForCausalLM.from_pretrained(
             model,
             cache_dir=self.model_path,
             device_map="cuda",
@@ -87,21 +88,21 @@ class LoadPhiVision:
         )
 
         # For best performance, use num_crops=4 for multi-frame, num_crops=16 for single-frame.
-        PHI_PROCESSOR = AutoProcessor.from_pretrained(
+        phi_processor = AutoProcessor.from_pretrained(
             model,
             cache_dir=self.model_path,
             trust_remote_code=True,
             num_crops=16
         )
 
-        return (PHI_MODEL, PHI_PROCESSOR)
+        return (phi_model, phi_processor)
 
 
 class RunPhi:
     """Node to run Phi model."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Phi"
+    CATEGORY = "phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("STRING",)
@@ -113,14 +114,14 @@ class RunPhi:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "PHI_MODEL": ("PHI_MODEL",),
-                "PHI_TOKENIZER": ("PHI_TOKENIZER",),
+                "phi_model": ("phi_model",),
+                "phi_tokenizer": ("phi_tokenizer",),
                 "system_message": ("STRING", {
-                    "default": "You are a helpful AI assistant.",
+                    "default": "You are an AI assistant that's helpful and efficient.",
                     "multiline": True
                 }),
                 "instruction": ("STRING", {
-                    "default": "What is the answer to life the universe and everything",
+                    "default": "What is the answer to life the universe and everything. Give me just the answer. No bla bla...",
                     "multiline": True
                 }),
                 "return_full_text": ("BOOLEAN", {
@@ -141,7 +142,7 @@ class RunPhi:
             }
         }
 
-    def execute(self, PHI_MODEL, PHI_TOKENIZER, system_message, instruction, return_full_text, do_sample, temperature, max_new_tokens):
+    def execute(self, phi_model, phi_tokenizer, system_message, instruction, return_full_text, do_sample, temperature, max_new_tokens):
         # Prepare messages
         messages = [ 
             {"role": "system", "content": system_message},
@@ -149,7 +150,7 @@ class RunPhi:
         ] 
 
         # Build pipeline
-        pipe = pipeline("text-generation", model=PHI_MODEL, tokenizer=PHI_TOKENIZER)
+        pipe = pipeline("text-generation", model=phi_model, tokenizer=phi_tokenizer)
         generation_args = { 
             "return_full_text": return_full_text,
             "do_sample": do_sample,
@@ -172,7 +173,7 @@ class RunPhiVision:
     """Node to run Phi model with vision."""
 
     # Node setup for ComfyUI
-    CATEGORY = "Phi"
+    CATEGORY = "phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("STRING",)
@@ -184,9 +185,9 @@ class RunPhiVision:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "PHI_MODEL": ("PHI_MODEL",),
-                "PHI_PROCESSOR": ("PHI_PROCESSOR",),
-                "IMAGE": ("IMAGE",),
+                "phi_model": ("phi_model",),
+                "phi_processor": ("phi_processor",),
+                "image": ("IMAGE",),
                 "instruction": ("STRING", {
                     "default": "Describe this image",
                     "multiline": True
@@ -221,31 +222,34 @@ class RunPhiVision:
             return out
         return [Image.fromarray(np.clip(255.0 * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))]
 
-    def execute(self, PHI_MODEL, PHI_PROCESSOR, IMAGE, instruction, do_sample, temperature, max_new_tokens, image_example=None, response_example=''):
-        # Check if example is valid
-        example_valid = True if (image_example is not None and len(response_example) > 0) else False
-
+    def execute(self, phi_model, phi_processor, image, instruction, do_sample, temperature, max_new_tokens, image_example=None, response_example=''):
         # Convert tensor to PIL image
-        images = self.tensor2pil(IMAGE)
-        example_image = [self.tensor2pil(image_example)[0]] if example_valid else []
+        images = self.tensor2pil(image)
+        start_index = 1
+        placeholder = ""
+        additional_instruction = ""
+
+        # Prepare data if example is provided
+        example_image = []
+        if (image_example is not None and len(response_example) > 0):
+            example_image = [self.tensor2pil(image_example)[0]] # Enforce a single example
+            start_index = 2
+            additional_instruction = f"Here is an example of pair of image and its description.\nImage: <|image_1|>\nDescription: {response_example}\n"
 
         # Prepare images placeholders in the prompt
-        placeholder = ''
-        start_index = 2 if example_valid else 1
         for index, value in enumerate(images, start=start_index):
             placeholder += f"\n<|image_{index}|>"
 
         # Prepare prompt
-        additional_instruction = f"Here is an example of pair of image and its description.\nImage: <|image_1|>\nDescription: {response_example}\n" if example_valid else ''
         messages = [{"role": "user", "content": additional_instruction + instruction + placeholder}]
-        prompt = PHI_PROCESSOR.tokenizer.apply_chat_template(
+        prompt = phi_processor.tokenizer.apply_chat_template(
             messages, 
             tokenize=False, 
             add_generation_prompt=True
         )
 
         # Prepare generation arguments
-        inputs = PHI_PROCESSOR(prompt, example_image + images, return_tensors="pt").to("cuda:0")
+        inputs = phi_processor(prompt, example_image + images, return_tensors="pt").to("cuda:0")
         generate_args = {}
         if do_sample:
             generate_args["do_sample"] = do_sample
@@ -254,16 +258,16 @@ class RunPhiVision:
             generate_args["do_sample"] = do_sample
 
         # Generate
-        generate_ids = PHI_MODEL.generate(
+        generate_ids = phi_model.generate(
             **inputs, 
-            eos_token_id=PHI_PROCESSOR.tokenizer.eos_token_id,
+            eos_token_id=phi_processor.tokenizer.eos_token_id,
             max_new_tokens=max_new_tokens,
             **generate_args
         )
 
         # Remove input tokens 
         generate_ids = generate_ids[:, inputs['input_ids'].shape[1]:]
-        response = PHI_PROCESSOR.batch_decode(
+        response = phi_processor.batch_decode(
             generate_ids, 
             skip_special_tokens=True, 
             clean_up_tokenization_spaces=False
