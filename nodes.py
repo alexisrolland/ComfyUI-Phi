@@ -17,27 +17,29 @@ class LoadPhi:
     RETURN_TYPES = ("phi_model", "phi_tokenizer")
 
     def __init__(self):
-        # Set models path to ./ComfyUI/models/microsoft
-        self.model_path = os.path.join(folder_paths.models_dir, "microsoft")
+        pass
 
     @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "model": (
-                    [
-                        "microsoft/Phi-3.5-mini-instruct",
-                        #"microsoft/Phi-3.5-MoE-instruct"
-                    ],
-                    {"default": "microsoft/Phi-3.5-mini-instruct"}
+                    ["Phi-3.5-mini-instruct"],
+                    {
+                        "default": "Phi-3.5-mini-instruct",
+                        "tooltip": "The name of the model to load."
+                    }
                 ),
             }
         }
 
     def execute(self, model):
+        # Model files should be placed in ./ComfyUI/models/microsoft
+        model = os.path.join(folder_paths.models_dir, "microsoft", model)
+
         phi_model = AutoModelForCausalLM.from_pretrained(
             model,
-            cache_dir=self.model_path,
+            local_files_only=True,
             device_map="cuda",
             torch_dtype="auto",
             trust_remote_code=True
@@ -45,7 +47,8 @@ class LoadPhi:
 
         phi_tokenizer = AutoTokenizer.from_pretrained(
             model,
-            cache_dir=self.model_path
+            local_files_only=True,
+            trust_remote_code=True
         )
 
         return (phi_model, phi_tokenizer)
@@ -61,25 +64,30 @@ class LoadPhiVision:
     RETURN_TYPES = ("phi_model", "phi_processor")
 
     def __init__(self):
-        # Set models path to ./ComfyUI/models/microsoft
-        self.model_path = os.path.join(folder_paths.models_dir, "microsoft")
+        pass
 
     @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "model": (
-                    ["microsoft/Phi-3.5-vision-instruct"],
-                    {"default": "microsoft/Phi-3.5-vision-instruct"}
+                    ["Phi-3.5-vision-instruct"],
+                    {
+                        "default": "Phi-3.5-vision-instruct",
+                        "tooltip": "The name of the model to load."
+                    }
                 ),
             }
         }
 
     def execute(self, model):
+        # Model files should be placed in ./ComfyUI/models/microsoft
+        model = os.path.join(folder_paths.models_dir, "microsoft", model)
+
         # Set _attn_implementation='eager' if you don't have flash_attn installed
         phi_model = AutoModelForCausalLM.from_pretrained(
             model,
-            cache_dir=self.model_path,
+            local_files_only=True,
             device_map="cuda",
             torch_dtype="auto",
             trust_remote_code=True,
@@ -90,7 +98,7 @@ class LoadPhiVision:
         # For best performance, use num_crops=4 for multi-frame, num_crops=16 for single-frame.
         phi_processor = AutoProcessor.from_pretrained(
             model,
-            cache_dir=self.model_path,
+            local_files_only=True,
             trust_remote_code=True,
             num_crops=16
         )
@@ -106,6 +114,7 @@ class RunPhi:
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("STRING",)
+    RETURN_NAME = ("text",)
 
     def __init__(self):
         pass
@@ -177,6 +186,7 @@ class RunPhiVision:
     FUNCTION = "execute"
     OUTPUT_NODE = False
     RETURN_TYPES = ("STRING",)
+    RETURN_NAME = ("text",)
 
     def __init__(self):
         pass
@@ -201,7 +211,7 @@ class RunPhiVision:
                     "step": 0.01
                 }),
                 "max_new_tokens": ("INT", {
-                    "default": 1000,
+                    "default": 500,
                     "min": 1
                 }),
             },
