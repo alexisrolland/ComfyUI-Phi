@@ -8,7 +8,7 @@ import folder_paths
 
 
 class LoadPhi:
-    """Node to download and load Phi model."""
+    """Node to load Phi model."""
 
     # Node setup for ComfyUI
     CATEGORY = "phi"
@@ -55,7 +55,7 @@ class LoadPhi:
 
 
 class LoadPhiVision:
-    """Node to download and load Phi model with vision."""
+    """Node to load Phi model with vision."""
 
     # Node setup for ComfyUI
     CATEGORY = "phi"

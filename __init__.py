@@ -11,8 +11,8 @@ NODE_CLASS_MAPPINGS = {
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoadPhi": "Download And Load Phi",
-    "LoadPhiVision": "Download And Load Phi Vision",
+    "LoadPhi": "Load Phi",
+    "LoadPhiVision": "Load Phi Vision",
     "RunPhi": "Run Phi",
     "RunPhiVision": "Run Phi Vision"
 }
