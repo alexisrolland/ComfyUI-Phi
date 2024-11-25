@@ -185,8 +185,8 @@ class RunPhiVision:
     CATEGORY = "phi"
     FUNCTION = "execute"
     OUTPUT_NODE = False
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAME = ("text",)
+    RETURN_TYPES = ("STRING", "STRING",)
+    RETURN_NAMES = ("instruction", "response",)
 
     def __init__(self):
         pass
@@ -244,14 +244,14 @@ class RunPhiVision:
         if (image_example is not None and len(response_example) > 0):
             example_image = [self.tensor2pil(image_example)[0]] # Enforce a single example
             start_index = 2
-            additional_instruction = f"Here is an example of pair of image and its description.\nImage: <|image_1|>\nDescription: {response_example}\n"
+            additional_instruction = f"\nHere is an example of an image and its description.\nImage: <|image_1|>\nDescription: {response_example}\nCan you describe this new image?"
 
         # Prepare images placeholders in the prompt
         for index, value in enumerate(images, start=start_index):
             placeholder += f"\n<|image_{index}|>"
 
         # Prepare prompt
-        messages = [{"role": "user", "content": additional_instruction + instruction + placeholder}]
+        messages = [{"role": "user", "content": instruction + additional_instruction + placeholder}]
         prompt = phi_processor.tokenizer.apply_chat_template(
             messages, 
             tokenize=False, 
@@ -276,11 +276,11 @@ class RunPhiVision:
         )
 
         # Remove input tokens 
-        generate_ids = generate_ids[:, inputs['input_ids'].shape[1]:]
+        generate_ids = generate_ids[:, inputs["input_ids"].shape[1]:]
         response = phi_processor.batch_decode(
             generate_ids, 
             skip_special_tokens=True, 
             clean_up_tokenization_spaces=False
         )[0]
 
-        return (response,)
+        return (messages[0]["content"], response,)
