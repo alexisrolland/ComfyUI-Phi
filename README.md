@@ -11,7 +11,7 @@ Custom ComfyUI nodes to run Microsoft's Phi models. Supported versions:
 Download the model files manually from the link above and place them in their corresponding folders like this:
 
 * `.\ComfyUI\models\microsoft\Phi-3.5-mini-instruct\`
-* `.\ComfyUI\models\microsoft\Phi-3.5-vision--instruct\`
+* `.\ComfyUI\models\microsoft\Phi-3.5-vision-instruct\`
 
 Go to the ComfyUI folder `.\ComfyUI\custom_nodes`, clone this repository and install Python dependencies:
 
