@@ -58,3 +58,7 @@ Drag and drop the image in ComfyUI to reload the workflow.
 ### Example Phi Vision
 
 ![Example Phi Vision](./examples/workflow_phi_vision.png)
+
+### Example Phi
+
+![Example Phi](./examples/workflow_phi.png)
