@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-phi"
 description = "Custom nodes to run microsoft/Phi models."
-version = "4.0.0"
+version = "4.0.1"
 license = { text = "Apache License 2.0" }
 dependencies = ["accelerate>=0.31.0"]
 

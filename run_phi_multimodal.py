@@ -22,7 +22,6 @@ class RunPhiMultimodal:
                 "phi_model": ("phi_model",),
                 "phi_processor": ("phi_processor",),
                 "phi_config": ("phi_config",),
-                "image": ("IMAGE",),
                 "instruction": ("STRING", {
                     "default": "Describe this image",
                     "multiline": True
@@ -31,6 +30,9 @@ class RunPhiMultimodal:
                     "default": 1000,
                     "min": 1
                 }),
+            },
+            "optional": {
+                "image": ("IMAGE",),
             }
         }
 
@@ -43,7 +45,7 @@ class RunPhiMultimodal:
             return out
         return [Image.fromarray(np.clip(255.0 * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))]
 
-    def execute(self, phi_model, phi_processor, phi_config, image, instruction,  max_new_tokens):
+    def execute(self, phi_model, phi_processor, phi_config, instruction,  max_new_tokens, image=None):
         # Define prompt structure
         user_prompt = '<|user|>'
         image_prompt = ''
@@ -51,17 +53,24 @@ class RunPhiMultimodal:
         prompt_suffix = '<|end|>'
         start_index = 1
 
-        # Prepare images in the prompt
-        images = self.tensor2pil(image) # Convert tensor to PIL image
-        for index, value in enumerate(images, start=start_index):
-            image_prompt += f"<|image_{index}|>"
+        # Check if image is provided
+        if image is None:
+            prompt = f'{user_prompt}{instruction}{prompt_suffix}{assistant_prompt}'
+            inputs = phi_processor(
+                text=prompt,
+                return_tensors='pt'
+            ).to('cuda:0')
+        else:
+            images = self.tensor2pil(image) # Convert tensor to PIL image
+            for index, value in enumerate(images, start=start_index):
+                image_prompt += f"<|image_{index}|>"
+            prompt = f'{user_prompt}{image_prompt}{instruction}{prompt_suffix}{assistant_prompt}'
 
-        prompt = f'{user_prompt}{image_prompt}{instruction}{prompt_suffix}{assistant_prompt}'
-        inputs = phi_processor(
-            text=prompt,
-            images=images,
-            return_tensors='pt'
-        ).to('cuda:0')
+            inputs = phi_processor(
+                text=prompt,
+                images=images,
+                return_tensors='pt'
+            ).to('cuda:0')
         
         # Generate response
         generate_ids = phi_model.generate(
