@@ -43,6 +43,7 @@ https://huggingface.co/lldacing/flash-attention-windows-wheel/resolve/main/flash
 
 ## Updates
 
+* `4.0.2`: Add support for loading model via `extra_model_paths.yaml`.
 * `4.0.0`: Add support for Phi-4-multimodal-instruct.
 * `3.0.0`: Enforce manual download of model files for cleaner file organization.
 * `2.0.0`: This major version introduces new inputs to provide a pair of image and response examples to the node Run Phi Vision.
