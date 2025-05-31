@@ -1,5 +1,7 @@
 import os
 from transformers import AutoModelForCausalLM, AutoProcessor
+
+# Modules from ComfyUI
 import folder_paths
 
 
@@ -31,11 +33,12 @@ class LoadPhiVision:
 
     def execute(self, model):
         # Model files should be placed in ./ComfyUI/models/microsoft
-        model = os.path.join(folder_paths.models_dir, "microsoft", model)
+        microsoft_folder = folder_paths.get_folder_paths("microsoft")[0]
+        model_path = os.path.join(microsoft_folder, model)
 
         # Set _attn_implementation='eager' if you don't have flash_attn installed
         phi_model = AutoModelForCausalLM.from_pretrained(
-            model,
+            model_path,
             local_files_only=True,
             device_map="cuda",
             torch_dtype="auto",
@@ -46,7 +49,7 @@ class LoadPhiVision:
 
         # For best performance, use num_crops=4 for multi-frame, num_crops=16 for single-frame.
         phi_processor = AutoProcessor.from_pretrained(
-            model,
+            model_path,
             local_files_only=True,
             trust_remote_code=True,
             num_crops=16

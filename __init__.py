@@ -6,6 +6,9 @@ from . import run_phi_multimodal
 from . import run_phi_vision
 
 
+import folder_paths, os
+folder_paths.add_model_folder_path("microsoft", os.path.join(folder_paths.models_dir, "microsoft"))
+
 # A dictionary that contains all nodes you want to export with their names
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {

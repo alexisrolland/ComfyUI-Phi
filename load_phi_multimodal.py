@@ -1,5 +1,7 @@
 import os
 from transformers import AutoModelForCausalLM, AutoProcessor, GenerationConfig
+
+# Modules from ComfyUI
 import folder_paths
 
 
@@ -31,10 +33,11 @@ class LoadPhiMultimodal:
 
     def execute(self, model):
         # Model files should be placed in ./ComfyUI/models/microsoft
-        model = os.path.join(folder_paths.models_dir, "microsoft", model)
+        microsoft_folder = folder_paths.get_folder_paths("microsoft")[0]
+        model_path = os.path.join(microsoft_folder, model)
 
         phi_model = AutoModelForCausalLM.from_pretrained(
-            model,
+            model_path,
             local_files_only=True,
             device_map="cuda",
             torch_dtype="auto",
@@ -45,12 +48,12 @@ class LoadPhiMultimodal:
 
         # For best performance, use num_crops=4 for multi-frame, num_crops=16 for single-frame.
         phi_processor = AutoProcessor.from_pretrained(
-            model,
+            model_path,
             local_files_only=True,
             trust_remote_code=True
         )
 
         # Load generation config
-        phi_config = GenerationConfig.from_pretrained(model)
+        phi_config = GenerationConfig.from_pretrained(model_path)
 
         return (phi_model, phi_processor, phi_config)

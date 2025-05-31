@@ -1,7 +1,7 @@
-import numpy as np
 import os
-from PIL import Image
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Modules from ComfyUI
 import folder_paths
 
 
@@ -33,10 +33,11 @@ class LoadPhi:
 
     def execute(self, model):
         # Model files should be placed in ./ComfyUI/models/microsoft
-        model = os.path.join(folder_paths.models_dir, "microsoft", model)
+        microsoft_folder = folder_paths.get_folder_paths("microsoft")[0]
+        model_path = os.path.join(microsoft_folder, model)
 
         phi_model = AutoModelForCausalLM.from_pretrained(
-            model,
+            model_path,
             local_files_only=True,
             device_map="cuda",
             torch_dtype="auto",
@@ -44,7 +45,7 @@ class LoadPhi:
         )
 
         phi_tokenizer = AutoTokenizer.from_pretrained(
-            model,
+            model_path,
             local_files_only=True,
             trust_remote_code=True
         )
