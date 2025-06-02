@@ -4,9 +4,9 @@ Custom ComfyUI nodes to run Microsoft's Phi models. Supported versions:
 
 - [Lexius/Phi-3.5-mini-instruct](https://huggingface.co/Lexius/Phi-3.5-mini-instruct)
 - [Lexius/Phi-3.5-vision-instruct](https://huggingface.co/Lexius/Phi-3.5-vision-instruct)
-- [microsoft/Phi-4-multimodal-instruct](https://huggingface.co/microsoft/Phi-4-multimodal-instruct)
+- [Lexius/Phi-4-multimodal-instruct](https://huggingface.co/Lexius/Phi-4-multimodal-instruct)
 
-> Phi 3.5 models have been forked to correct the issue 'DynamicCache' object has no attribute 'get_max_length'
+> Models have been forked to correct various issues that were not addressed in the original repositories
 
 ## Getting started
 
@@ -41,10 +41,14 @@ https://huggingface.co/lldacing/flash-attention-windows-wheel/resolve/main/flash
 
 # Install Flash Attention
 ..\..\python_embeded\python.exe -s -m pip install flash_attn-2.7.4%2Bcu126torch2.6.0cxx11abiFALSE-cp312-cp312-win_amd64.whl
+
+# And install Triton for Windows
+..\..\python_embeded\python.exe -s -m pip install triton-windows
 ```
 
 ## Updates
 
+* `4.0.3`: Update dependencies to remove pinned version of `transformers` in `requirements.txt` and add `triton-windows` installation step in the README.
 * `4.0.2`: Add support for loading model via `extra_model_paths.yaml`.
 * `4.0.0`: Add support for Phi-4-multimodal-instruct.
 * `3.0.0`: Enforce manual download of model files for cleaner file organization.
