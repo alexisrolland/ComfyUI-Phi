@@ -2,9 +2,11 @@
 
 Custom ComfyUI nodes to run Microsoft's Phi models. Supported versions:
 
-- [microsoft/Phi-3.5-mini-instruct](https://huggingface.co/microsoft/Phi-3.5-mini-instruct)
-- [microsoft/Phi-3.5-vision-instruct](https://huggingface.co/microsoft/Phi-3.5-vision-instruct)
+- [Lexius/Phi-3.5-mini-instruct](https://huggingface.co/Lexius/Phi-3.5-mini-instruct)
+- [Lexius/Phi-3.5-vision-instruct](https://huggingface.co/Lexius/Phi-3.5-vision-instruct)
 - [microsoft/Phi-4-multimodal-instruct](https://huggingface.co/microsoft/Phi-4-multimodal-instruct)
+
+> Phi 3.5 models have been forked to correct the issue 'DynamicCache' object has no attribute 'get_max_length'
 
 ## Getting started
 
