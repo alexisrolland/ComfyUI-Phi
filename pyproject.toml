@@ -1,9 +1,9 @@
 [project]
 name = "comfyui-phi"
 description = "Custom nodes to run microsoft/Phi models."
-version = "4.0.2"
+version = "4.0.3"
 license = { text = "Apache License 2.0" }
-dependencies = ["accelerate>=0.31.0"]
+dependencies = ["accelerate>=0.31.0", "backoff>=2.2.1", "peft>=0.13.2"]
 
 [project.urls]
 Repository = "https://github.com/alexisrolland/ComfyUI-Phi"
