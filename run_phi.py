@@ -1,4 +1,5 @@
 from transformers import pipeline
+import comfy.model_management as mm
 
 
 class RunPhi:
@@ -43,15 +44,26 @@ class RunPhi:
                     "default": 500,
                     "min": 1
                 }),
+                "offload_after_use": ("BOOLEAN", {
+                    "default": False, 
+                    "tooltip": "If True, Phi will unload from VRAM to your offload device after running, (note that comfy-unload-model cannot unload Phi)"
+                }),
             }
         }
 
-    def execute(self, phi_model, phi_tokenizer, system_message, instruction, return_full_text, do_sample, temperature, max_new_tokens):
+    def execute(self, phi_model, phi_tokenizer, system_message, instruction, return_full_text, do_sample, temperature, max_new_tokens, offload_after_use):
         # Prepare messages
         messages = [ 
             {"role": "system", "content": system_message},
             {"role": "user", "content": instruction}
         ] 
+        # make sure phi is sent to the device?
+        if offload_after_use:
+            
+            device = mm.get_torch_device()
+            print(f"sending Phi to {device}")
+            phi_model.to(device)
+            mm.soft_empty_cache()
 
         # Build pipeline
         pipe = pipeline("text-generation", model=phi_model, tokenizer=phi_tokenizer)
@@ -69,5 +81,12 @@ class RunPhi:
         # Convert dictionary to text if returning full text
         if return_full_text:
             response = str(response)
+
+        # offload Phi
+        if offload_after_use:
+            offload_device = mm.unet_offload_device()
+            print("Offloading Phi model...")
+            phi_model.to(offload_device)
+            mm.soft_empty_cache()
 
         return (response,)
