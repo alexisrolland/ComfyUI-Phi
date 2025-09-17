@@ -28,23 +28,37 @@ class LoadPhiVision:
                         "tooltip": "The name of the model to load."
                     }
                 ),
+            },
+            "optional": {
+                "dtype": (
+                    ["auto", "float16", "bfloat16"],
+                    {
+                        "default": "auto",
+                        "tooltip": "The model dtype. bfloat16 provides better speed but less precision."
+                    }
+                ),
+                "attention": (
+                    ["eager", "flash_attention_2"],
+                    {
+                        "default": "eager",
+                        "tooltip": "Attention mecanism. Flash Attention should be faster."
+                    }
+                )
             }
         }
 
-    def execute(self, model):
+    def execute(self, model, dtype="auto", attention="eager"):
         # Model files should be placed in ./ComfyUI/models/microsoft
         microsoft_folder = folder_paths.get_folder_paths("microsoft")[0]
         model_path = os.path.join(microsoft_folder, model)
 
-        # Set _attn_implementation='eager' if you don't have flash_attn installed
         phi_model = AutoModelForCausalLM.from_pretrained(
             model_path,
             local_files_only=True,
             device_map="cuda",
-            torch_dtype="auto",
+            torch_dtype=dtype,
             trust_remote_code=True,
-            #_attn_implementation="flash_attention_2",
-            _attn_implementation="eager"
+            _attn_implementation=attention
         )
 
         # For best performance, use num_crops=4 for multi-frame, num_crops=16 for single-frame.
