@@ -48,6 +48,7 @@ https://huggingface.co/lldacing/flash-attention-windows-wheel/resolve/main/flash
 
 ## Updates
 
+* `4.1.0`: Add `dtype` and `attention` widgets in `LoadPhiVision` node.
 * `4.0.3`: Update dependencies to remove pinned version of `transformers` in `requirements.txt` and add `triton-windows` installation step in the README.
 * `4.0.2`: Add support for loading model via `extra_model_paths.yaml`.
 * `4.0.0`: Add support for Phi-4-multimodal-instruct.
